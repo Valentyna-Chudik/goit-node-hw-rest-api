@@ -1,72 +1,75 @@
-const fs = require("fs/promises");
-const path = require("path");
-const { v4: uuid } = require("uuid");
+const db = require("./db");
+const { ObjectID } = require("mongodb");
 
-const contactsPath = path.join(__dirname, "contacts.json");
-
-async function listContacts() {
+const getCollection = async (db, name) => {
   try {
-    const file = await fs.readFile(contactsPath, "utf-8");
-    const contacts = JSON.parse(file);
-    return contacts;
+    const client = await db;
+    const collection = await client.db().collection(name);
+    return collection;
   } catch (err) {
     return console.error(err.message);
   }
-}
+};
 
-async function getContactById(contactId) {
+const listContacts = async () => {
   try {
-    const contacts = await listContacts();
-    const contactById = contacts.find(({ id }) => id.toString() === contactId);
-    return contactById;
+    const collection = await getCollection(db, "contacts");
+    const result = await collection.find({}).toArray();
+    return result;
+  } catch (err) {
+    return console.error(err.message);
+  }
+};
+
+const getContactById = async (contactId) => {
+  try {
+    const collection = await getCollection(db, "contacts");
+    const objectID = new ObjectID(contactId);
+    // console.log(objectID.getTimestamp(contactId)); // record creation time
+    const [result] = await collection.find({ _id: objectID }).toArray();
+    return result;
   } catch (err) {
     console.error(err.message);
   }
-}
+};
 
-async function removeContact(contactId) {
+const addContact = async (body) => {
   try {
-    const contacts = await listContacts();
-    const contact = contacts.find(({ id }) => id.toString() === contactId);
-    const updatedContacts = contacts.filter(
-      ({ id }) => id.toString() !== contactId
+    const newContact = { ...body };
+    const collection = await getCollection(db, "contacts");
+    const {
+      ops: [result],
+    } = await collection.insertOne(newContact);
+    return result;
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
+const updateContact = async (contactId, body) => {
+  try {
+    const collection = await getCollection(db, "contacts");
+    const objectID = new ObjectID(contactId);
+    const { result } = await collection.findOneAndUpdate(
+      { _id: objectID },
+      { $set: body },
+      { returnOriginal: false }
     );
-    await fs.writeFile(contactsPath, JSON.stringify(updatedContacts, "utf8"));
-    return contact;
+    return result;
   } catch (err) {
     console.error(err.message);
   }
-}
-
-async function addContact(body) {
+};
+const removeContact = async (contactId) => {
   try {
-    const contacts = await listContacts();
-    const newContact = { ...body, id: uuid() };
-    const updatedContacts = [...contacts, newContact];
-    await fs.writeFile(contactsPath, JSON.stringify(updatedContacts, "utf8"));
-    return newContact;
+    const collection = await getCollection(db, "contacts");
+    const objectID = new ObjectID(contactId);
+    const { result } = await collection.findOneAndDelete({ _id: objectID });
+    return result;
   } catch (err) {
     console.error(err.message);
   }
-}
-
-async function updateContact(contactId, body) {
-  try {
-    const contacts = await listContacts();
-    const targetContactIndex = contacts.findIndex(
-      ({ id }) => id.toString() === contactId
-    );
-    if (targetContactIndex === -1) return;
-    contacts[targetContactIndex] = {
-      ...contacts[targetContactIndex],
-      ...body,
-    };
-    await fs.writeFile(contactsPath, JSON.stringify(contacts, "utf8"));
-    return contacts[targetContactIndex];
-  } catch (err) {
-    console.error(err.message);
-  }
-}
+};
 
 module.exports = {
   listContacts,
@@ -75,34 +78,3 @@ module.exports = {
   addContact,
   updateContact,
 };
-
-// const db = require("./db");
-
-// const listContacts = async () => {
-//   return db.get("contacts").value();
-// };
-
-// const getContactById = async (contactId) => {
-//   return db.get("contacts").find({ contactId }).value();
-// };
-
-// const removeContact = async (contactId) => {
-//   const [record] = db.get("contacts").remove({ contactId }).write();
-//   return record;
-// };
-
-// const addContact = async (body) => {
-//   const id = uuid();
-//   const record = {
-//     id,
-//     ...body,
-//   };
-//   db.get("contacts").push(record).write();
-//   return record;
-// };
-
-// const updateContact = async (contactId, body) => {
-//   const record = db.get("contacts").find({ contactId }).assign(body).value();
-//   db.write();
-//   return record.contactId ? record : null;
-// };

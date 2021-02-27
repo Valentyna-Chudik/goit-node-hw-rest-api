@@ -1,9 +1,18 @@
-// const low = require("lowdb");
-// const FileSync = require("lowdb/adapters/FileSync");
+const { MongoClient } = require("mongodb");
+require("dotenv").config();
 
-// const adapter = new FileSync("./model/contacts.json");
-// const db = low(adapter);
+const uriDb = process.env.URI_DB;
 
-// db.defaults({ contacts: [] }).write();
+const db = MongoClient.connect(uriDb, {
+  useUnifiedTopology: true,
+  poolSize: 5,
+});
 
-// module.exports = db;
+process.on("SIGINT", async () => {
+  const client = await db;
+  client.close();
+  console.log("Connection for db closed and app terminated");
+  process.exit(1);
+});
+
+module.exports = db;

@@ -10,9 +10,7 @@ router.get("/", async (_req, res, next) => {
       status: "Success",
       code: 200,
       message: "Contacts found",
-      data: {
-        contacts,
-      },
+      data: contacts,
     });
   } catch (e) {
     next(e);
@@ -46,51 +44,13 @@ router.get("/:contactId", async (req, res, next) => {
 
 router.post("/", validate.addContact, async (req, res, next) => {
   try {
-    const { name, email, phone } = req.body;
-    await Contacts.addContact(name, email, phone);
-    if (name && email && phone) {
-      return res.status(201).json({
-        status: "Success",
-        code: 201,
-        message: "Contact created",
-        data: {
-          name,
-          email,
-          phone,
-        },
-      });
-    } else {
-      return res.status(400).json({
-        status: "Error",
-        code: 400,
-        message: "Missing required name field",
-      });
-    }
-  } catch (e) {
-    next(e);
-  }
-});
-
-router.delete("/:contactId", async (req, res, next) => {
-  try {
-    const contact = await Contacts.removeContact(req.params.contactId);
-
-    if (contact) {
-      return res.json({
-        status: "Success",
-        code: 200,
-        message: "Contact deleted",
-        data: {
-          contact,
-        },
-      });
-    } else {
-      return res.status(404).json({
-        status: "Error",
-        code: 404,
-        message: "Not found",
-      });
-    }
+    const contact = await Contacts.addContact(req.body);
+    return res.status(201).json({
+      status: "Success",
+      code: 201,
+      message: "Contact created",
+      data: contact,
+    });
   } catch (e) {
     next(e);
   }
@@ -125,6 +85,31 @@ router.patch("/:contactId", validate.updateContact, async (req, res, next) => {
         status: "Error",
         code: 400,
         message: "Missing fields",
+      });
+    }
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.delete("/:contactId", async (req, res, next) => {
+  try {
+    const contact = await Contacts.removeContact(req.params.contactId);
+
+    if (contact) {
+      return res.json({
+        status: "Success",
+        code: 200,
+        message: "Contact deleted",
+        data: {
+          contact,
+        },
+      });
+    } else {
+      return res.status(404).json({
+        status: "Error",
+        code: 404,
+        message: "Not found",
       });
     }
   } catch (e) {
