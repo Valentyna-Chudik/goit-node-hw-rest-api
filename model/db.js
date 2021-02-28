@@ -1,17 +1,30 @@
-const { MongoClient } = require("mongodb");
-require("dotenv").config();
+const mongoose = require("mongoose");
 
+require("dotenv").config();
 const uriDb = process.env.URI_DB;
 
-const db = MongoClient.connect(uriDb, {
+const db = mongoose.connect(uriDb, {
+  useNewUrlParser: true,
+  useCreateIndex: true,
   useUnifiedTopology: true,
-  poolSize: 5,
+  useFindAndModify: false,
+});
+
+mongoose.connection.on("connection", () => {
+  console.log("Database connection successful");
+});
+
+mongoose.connection.on("error", (err) => {
+  console.log(`Database connection error: ${err.message}`);
+});
+
+mongoose.connection.on("disconnected", () => {
+  console.log("Database disconnected");
 });
 
 process.on("SIGINT", async () => {
-  const client = await db;
-  client.close();
-  console.log("Connection for db closed and app terminated");
+  await mongoose.connection.close();
+  console.log("Database сonnection closed and app terminated");
   process.exit(1);
 });
 

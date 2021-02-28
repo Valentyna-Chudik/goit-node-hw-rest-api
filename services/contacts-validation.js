@@ -9,7 +9,7 @@ const schemaAddContact = Joi.object({
     })
     .required(),
   phone: Joi.string().min(10).max(13).required(),
-  subscription: Joi.string().valid("free", "pro", "premium").required(),
+  subscription: Joi.string().valid("free", "pro", "premium").default("free"),
   password: Joi.string().required(),
   token: Joi.string().allow("").default(""),
 });
@@ -23,7 +23,7 @@ const schemaUpdateContact = Joi.object({
     })
     .optional(),
   phone: Joi.string().min(10).max(13).optional(),
-  subscription: Joi.string().valid("free", "pro", "premium").optional(),
+  subscription: Joi.string().valid("free", "pro", "premium").default("free"),
   password: Joi.string().optional(),
   token: Joi.string().allow("").default(""),
 });
