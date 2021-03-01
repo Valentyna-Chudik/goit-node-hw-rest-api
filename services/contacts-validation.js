@@ -5,10 +5,13 @@ const schemaAddContact = Joi.object({
   email: Joi.string()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ["com", "net", "gmail"] },
+      tlds: { allow: ["com", "net"] },
     })
     .required(),
   phone: Joi.string().min(10).max(13).required(),
+  subscription: Joi.string().valid("free", "pro", "premium").default("free"),
+  password: Joi.string().required(),
+  token: Joi.string().allow("").default(""),
 });
 
 const schemaUpdateContact = Joi.object({
@@ -20,6 +23,9 @@ const schemaUpdateContact = Joi.object({
     })
     .optional(),
   phone: Joi.string().min(10).max(13).optional(),
+  subscription: Joi.string().valid("free", "pro", "premium").default("free"),
+  password: Joi.string().optional(),
+  token: Joi.string().allow("").default(""),
 });
 
 const validate = (schema, obj, next) => {
@@ -31,12 +37,13 @@ const validate = (schema, obj, next) => {
       message: `Filled: ${message.replace(/"/g, "")}`,
     });
   }
+  next();
 };
 
-module.exports.addContact = (req, res, next) => {
+module.exports.addContact = (req, _res, next) => {
   return validate(schemaAddContact, req.body, next);
 };
 
-module.exports.updateContact = (req, res, next) => {
+module.exports.updateContact = (req, _res, next) => {
   return validate(schemaUpdateContact, req.body, next);
 };
