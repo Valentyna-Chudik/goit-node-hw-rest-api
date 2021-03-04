@@ -9,9 +9,10 @@ const register = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await Users.findUserByEmail(email);
+
     if (user) {
       return res.status(HttpCode.CONFLICT).json({
-        status: "error",
+        status: "Error",
         code: HttpCode.CONFLICT,
         data: "Conflict",
         message: "Email in use",
@@ -20,7 +21,7 @@ const register = async (req, res, next) => {
 
     const newUser = await Users.createUser({ email, password });
     return res.status(HttpCode.CREATED).json({
-      status: "success",
+      status: "Success",
       code: HttpCode.CREATED,
       data: {
         user: {
@@ -42,7 +43,7 @@ const login = async (req, res, next) => {
 
     if (!user || !isPasswordValid) {
       return res.status(HttpCode.UNAUTHORIZED).json({
-        status: "error",
+        status: "Error",
         code: HttpCode.UNAUTHORIZED,
         data: "Unauthorized",
         message: "Email or password is wrong",
@@ -53,9 +54,8 @@ const login = async (req, res, next) => {
     const payload = { userId };
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "8h" });
     await Users.updateUserToken(userId, token);
-
     return res.status(HttpCode.OK).json({
-      status: "success",
+      status: "Success",
       code: HttpCode.OK,
       data: {
         token,
@@ -69,17 +69,43 @@ const login = async (req, res, next) => {
     next(e);
   }
 };
+
 const logout = async (req, res, next) => {
   try {
-    const id = req.user.id;
-    await Users.updateUserToken(id, null);
-    return res.status(HttpCode.NO_CONTENT).json({ message: "Nothing" });
+    const userId = req.user.id;
+    await Users.updateUserToken(userId, null);
+    return res.status(HttpCode.NO_CONTENT).json();
   } catch (e) {
     next(e);
   }
 };
 
-const getCurrentUser = async (req, res, next) => {};
+const getCurrentUser = async (req, res, next) => {
+  try {
+    const userToken = req.user.token;
+    const user = await Users.findUserByToken(userToken);
+
+    if (!user) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: "Error",
+        code: HttpCode.UNAUTHORIZED,
+        data: "Unauthorized",
+        message: "Not authorized",
+      });
+    }
+
+    return res.status(HttpCode.OK).json({
+      status: "Success",
+      code: HttpCode.OK,
+      data: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    });
+  } catch (e) {
+    next(e);
+  }
+};
 
 module.exports = {
   register,

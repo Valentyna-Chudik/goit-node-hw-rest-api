@@ -1,12 +1,13 @@
 const Contacts = require("../model/contacts");
+const { HttpCode } = require("../helpers/constants");
 
 const getAll = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const contacts = await Contacts.listContacts(userId);
-    return res.json({
+    return res.status(HttpCode.OK).json({
       status: "Success",
-      code: 200,
+      code: HttpCode.OK,
       message: "Contacts found",
       data: contacts,
     });
@@ -21,18 +22,18 @@ const getById = async (req, res, next) => {
     const contact = await Contacts.getContactById(req.params.contactId, userId);
 
     if (contact) {
-      return res.json({
+      return res.status(HttpCode.OK).json({
         status: "Success",
-        code: 200,
+        code: HttpCode.OK,
         message: "Contact found",
         data: {
           contact,
         },
       });
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: "Error",
-        code: 404,
+        code: HttpCode.NOT_FOUND,
         message: "Not found",
       });
     }
@@ -45,9 +46,9 @@ const create = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const contact = await Contacts.addContact({ ...req.body, owner: userId });
-    return res.status(201).json({
+    return res.status(HttpCode.CREATED).json({
       status: "Success",
-      code: 201,
+      code: HttpCode.CREATED,
       message: "Contact created",
       data: contact,
     });
@@ -59,6 +60,7 @@ const create = async (req, res, next) => {
 const update = async (req, res, next) => {
   try {
     const userId = req.user.id;
+
     if (req.body) {
       const contact = await Contacts.updateContact(
         req.params.contactId,
@@ -67,25 +69,25 @@ const update = async (req, res, next) => {
       );
 
       if (contact) {
-        return res.json({
+        return res.status(HttpCode.OK).json({
           status: "Success",
-          code: 200,
+          code: HttpCode.OK,
           message: "Contact updated",
           data: {
             contact,
           },
         });
       } else {
-        return res.status(404).json({
+        return res.status(HttpCode.NOT_FOUND).json({
           status: "Error",
-          code: 404,
+          code: HttpCode.NOT_FOUND,
           message: "Not found",
         });
       }
     } else {
-      return res.status(400).json({
+      return res.status(HttpCode.BAD_REQUEST).json({
         status: "Error",
-        code: 400,
+        code: HttpCode.BAD_REQUEST,
         message: "Missing fields",
       });
     }
@@ -100,18 +102,18 @@ const remove = async (req, res, next) => {
     const contact = await Contacts.removeContact(req.params.contactId, userId);
 
     if (contact) {
-      return res.json({
+      return res.status(HttpCode.OK).json({
         status: "Success",
-        code: 200,
+        code: HttpCode.OK,
         message: "Contact deleted",
         data: {
           contact,
         },
       });
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: "Error",
-        code: 404,
+        code: HttpCode.NOT_FOUND,
         message: "Not found",
       });
     }

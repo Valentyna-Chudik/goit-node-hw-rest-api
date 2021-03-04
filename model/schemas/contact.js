@@ -20,21 +20,6 @@ const contactSchema = new Schema(
       required: [true, "Set your phone number, please"],
       unique: true,
     },
-    subscription: {
-      type: String,
-      enum: ["free", "pro", "premium"],
-      default: "free",
-      required: true,
-    },
-    password: {
-      type: String,
-      default: "password",
-      required: [true, "Set your password, please"],
-    },
-    token: {
-      type: String,
-      default: "",
-    },
     owner: {
       type: SchemaTypes.ObjectId,
       ref: "user",
