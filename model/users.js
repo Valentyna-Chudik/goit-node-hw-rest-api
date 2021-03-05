@@ -45,10 +45,20 @@ const findUserByToken = async (token) => {
   }
 };
 
+// const findUserAndUpdate = async (userId, subscription) => {
+//   try {
+//     const result = await User.updateOne({ _id: userId }, { subscription });
+//     return result;
+//   } catch (err) {
+//     console.error(err.message);
+//   }
+// };
+
 module.exports = {
   findUserByEmail,
   findUserById,
   createUser,
   updateUserToken,
   findUserByToken,
+  // findUserAndUpdate,
 };

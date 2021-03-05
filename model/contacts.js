@@ -1,12 +1,41 @@
 const Contact = require("./schemas/contact");
 
-const listContacts = async (userId) => {
+const listContacts = async (
+  userId,
+  { sortBy, sortByDesk, sub = "free", filter, page = "1", limit = "20" }
+) => {
   try {
-    const result = await Contact.find({ owner: userId }).populate({
-      path: "owner",
-      select: "email -_id",
-    });
-    return result;
+    const result = await Contact.paginate(
+      { owner: userId },
+      {
+        limit,
+        page,
+        sort: {
+          ...(sortBy ? { [`${sortBy}`]: 1 } : {}),
+          ...(sortByDesk ? { [`${sortByDesk}`]: -1 } : {}),
+        },
+        select: filter ? filter.split("|").join(" ") : "",
+        populate: {
+          path: "owner",
+          select: "email -_id",
+        },
+      }
+    );
+
+    if (sub) {
+      const filteredContacts = await Contact.find({ subscription: sub });
+      return filteredContacts;
+    }
+
+    const { docs: contacts, totalDocs: total } = result;
+    return {
+      total: total.toString(),
+      limit,
+      page,
+      filter,
+      sub,
+      contacts,
+    };
   } catch (err) {
     return console.error(err.message);
   }
@@ -38,7 +67,7 @@ const addContact = async (body) => {
 
 const updateContact = async (contactId, body, userId) => {
   try {
-    const result = await Contact.findByIdAndUpdate(
+    const result = await Contact.findOneAndUpdate(
       { _id: contactId, owner: userId },
       { ...body },
       { new: true }
@@ -51,7 +80,7 @@ const updateContact = async (contactId, body, userId) => {
 
 const removeContact = async (contactId, userId) => {
   try {
-    const result = await Contact.findByIdAndRemove({
+    const result = await Contact.findOneAndRemove({
       _id: contactId,
       owner: userId,
     });

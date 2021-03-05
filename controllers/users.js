@@ -112,4 +112,5 @@ module.exports = {
   login,
   logout,
   getCurrentUser,
+  // updateUserSub,
 };

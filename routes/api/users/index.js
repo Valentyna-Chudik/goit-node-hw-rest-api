@@ -8,5 +8,6 @@ router.post("/auth/register", validate.createUser, userController.register);
 router.post("/auth/login", userController.login);
 router.post("/auth/logout", guard, userController.logout);
 router.get("/current", guard, userController.getCurrentUser);
+// router.patch("/", guard, userController.updateUserSub);
 
 module.exports = router;
