@@ -53,9 +53,12 @@ const findUserByToken = async (token) => {
 //     console.error(err.message);
 //   }
 // };
-const updateUserAvatar = async (userId, avatar) => {
+const updateUserAvatar = async (userId, avatar, imgIdCloud) => {
   try {
-    const result = await User.updateOne({ _id: userId }, { avatarURL: avatar });
+    const result = await User.updateOne(
+      { _id: userId },
+      { avatarURL: avatar, imgIdCloud }
+    );
     return result;
   } catch (err) {
     return console.error(err.message);
