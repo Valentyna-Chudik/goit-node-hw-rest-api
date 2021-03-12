@@ -53,6 +53,14 @@ const findUserByToken = async (token) => {
 //     console.error(err.message);
 //   }
 // };
+const updateUserAvatar = async (userId, avatar) => {
+  try {
+    const result = await User.updateOne({ _id: userId }, { avatarURL: avatar });
+    return result;
+  } catch (err) {
+    return console.error(err.message);
+  }
+};
 
 module.exports = {
   findUserByEmail,
@@ -61,4 +69,5 @@ module.exports = {
   updateUserToken,
   findUserByToken,
   // findUserAndUpdate,
+  updateUserAvatar,
 };

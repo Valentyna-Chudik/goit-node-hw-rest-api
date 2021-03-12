@@ -9,13 +9,16 @@ router
   .post("/", guard, validate.addContact, contactsController.create);
 
 router
-  .get("/:contactId", guard, contactsController.getById)
+  .get("/:contactId", [guard, validate.ContactID], contactsController.getById)
   .patch(
     "/:contactId",
-    guard,
-    validate.updateContact,
+    [guard, validate.ContactID, validate.updateContact],
     contactsController.update
   )
-  .delete("/:contactId", guard, contactsController.remove);
+  .delete(
+    "/:contactId",
+    [guard, validate.ContactID],
+    contactsController.remove
+  );
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 const bcrypt = require("bcryptjs");
+const gravatar = require("gravatar");
 const { Subscriptions } = require("../../helpers/constants");
 
 require("dotenv").config();
@@ -26,6 +27,12 @@ const userSchema = new Schema(
       type: String,
       enum: [Subscriptions.FREE, Subscriptions.PRO, Subscriptions.PREMIUM],
       default: Subscriptions.FREE,
+    },
+    avatarURL: {
+      type: String,
+      default: function () {
+        return gravatar.url(this.email, { s: "250" }, true);
+      },
     },
     token: {
       type: String,

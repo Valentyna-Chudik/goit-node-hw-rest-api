@@ -25,6 +25,10 @@ const schemaUpdateContact = Joi.object({
   subscription: Joi.string().valid("free", "pro", "premium").default("free"),
 });
 
+const schemaContactID = Joi.object({
+  id: Joi.string().required(),
+});
+
 const validate = (schema, obj, next) => {
   const { error } = schema.validate(obj);
   if (error) {
@@ -44,4 +48,8 @@ module.exports.addContact = (req, _res, next) => {
 
 module.exports.updateContact = (req, _res, next) => {
   return validate(schemaUpdateContact, req.body, next);
+};
+
+module.exports.ContactID = (req, _res, next) => {
+  return validate(schemaContactID, req.query, next);
 };
