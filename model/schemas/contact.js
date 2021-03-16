@@ -7,8 +7,6 @@ const contactSchema = new Schema(
     name: {
       type: String,
       required: [true, "Set your name, please"],
-      minlength: 3,
-      maxlength: 30,
       unique: true,
     },
     email: {
@@ -33,7 +31,7 @@ const contactSchema = new Schema(
       ref: "user",
     },
   },
-  { versionKey: false, timestamps: true }
+  { versionKey: false, timestamps: false }
 );
 
 // contactSchema.virtual("contactId").get(function () {

@@ -46,11 +46,12 @@ const create = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const contact = await Contacts.addContact({ ...req.body, owner: userId });
+
     return res.status(HttpCode.CREATED).json({
       status: "Success",
       code: HttpCode.CREATED,
       message: "Contact created",
-      data: contact,
+      data: { contact },
     });
   } catch (e) {
     next(e);

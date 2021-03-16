@@ -1,4 +1,5 @@
 const Joi = require("joi");
+
 const { HttpCode } = require("../../../helpers/constants");
 
 const schemaAddContact = Joi.object({
@@ -25,18 +26,21 @@ const schemaUpdateContact = Joi.object({
   subscription: Joi.string().valid("free", "pro", "premium").default("free"),
 });
 
-const schemaContactID = Joi.object({
-  id: Joi.string().required(),
-});
+// const schemaContactID = Joi.object({
+//   id: Joi.string().required(),
+// });
 
 const validate = (schema, obj, next) => {
   const { error } = schema.validate(obj);
   if (error) {
     const [{ message }] = error.details;
+    const messageText =
+      Object.keys(obj).length === 0
+        ? "Missing fields"
+        : `Field ${message.replace(/"/g, "")}`;
     return next({
-      status: "Error",
-      code: HttpCode.BAD_REQUEST,
-      message: `Filled: ${message.replace(/"/g, "")}`,
+      status: HttpCode.BAD_REQUEST,
+      message: messageText,
     });
   }
   next();
@@ -50,6 +54,6 @@ module.exports.updateContact = (req, _res, next) => {
   return validate(schemaUpdateContact, req.body, next);
 };
 
-module.exports.ContactID = (req, _res, next) => {
-  return validate(schemaContactID, req.query, next);
-};
+// module.exports.ContactID = (req, _res, next) => {
+//   return validate(schemaContactID, req.query, next);
+// };

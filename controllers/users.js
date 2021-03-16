@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const Users = require("../model/users");
 const fs = require("fs").promises;
 const path = require("path");
 const Jimp = require("jimp");
@@ -7,6 +6,7 @@ const { promisify } = require("util");
 const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
 
+const Users = require("../model/users");
 const { Subscriptions, HttpCode } = require("../helpers/constants");
 const createFolderIsExist = require("../helpers/create-dir");
 
@@ -88,7 +88,7 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    const userId = String(req.user._id);
     await Users.updateUserToken(userId, null);
     return res.status(HttpCode.NO_CONTENT).json();
   } catch (e) {
@@ -125,7 +125,7 @@ const getCurrentUser = async (req, res, next) => {
 
 const avatars = async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    const userId = String(req.user._id);
     // STATIC
     // const avatarUrl = await saveAvatarToStatic(req);
     // await Users.updateUserAvatar(userId, avatarUrl);
@@ -150,7 +150,7 @@ const avatars = async (req, res, next) => {
 };
 
 const saveAvatarToStatic = async (req) => {
-  const userId = req.user.id;
+  const userId = String(req.user._id);
   const USERS_AVATARS = process.env.USERS_AVATARS;
   const filePath = req.file.path;
   const newAvatarName = `${Date.now()}-${req.file.originalname}`;
@@ -175,12 +175,14 @@ const saveAvatarToStatic = async (req) => {
 const saveAvatarToCloud = async (req) => {
   const filePath = req.file.path;
   const result = await uploadCloud(filePath, {
+    public_id: req.user.imgIdCloud?.replace("Photo/", ""),
     folder: "Photo",
     transformation: { width: 250, height: 250, crop: "fill" },
   });
-  cloudinary.uploader.destroy(req.user.imgIdCloud, (err, result) => {
-    console.log(err, result);
-  });
+
+  // cloudinary.uploader.destroy(req.user.imgIdCloud, (err, result) => {
+  //   console.log(err, result);
+  // });
 
   try {
     await fs.unlink(filePath);

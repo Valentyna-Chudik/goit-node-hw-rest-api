@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 const bcrypt = require("bcryptjs");
 const gravatar = require("gravatar");
+
 const { Subscriptions } = require("../../helpers/constants");
 
 require("dotenv").config();
@@ -43,7 +44,7 @@ const userSchema = new Schema(
       default: null,
     },
   },
-  { versionKey: false, timestamps: true }
+  { versionKey: false, timestamps: false }
 );
 
 userSchema.pre("save", async function (next) {

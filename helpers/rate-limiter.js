@@ -1,4 +1,5 @@
 const rateLimit = require("express-rate-limit");
+
 const { HttpCode } = require("./constants");
 
 const registerLimit = rateLimit({
@@ -17,7 +18,7 @@ const registerLimit = rateLimit({
 
 const reguestLimit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 2,
+  max: 100,
   handler: (_req, res, _next) => {
     return res.status(HttpCode.BAD_REQUEST).json({
       status: "Error",
