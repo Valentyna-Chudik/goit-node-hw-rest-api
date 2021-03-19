@@ -56,7 +56,7 @@ const updateUserToken = async (userId, token) => {
 
 const updateVerificationToken = async (userId, verify, verificationToken) => {
   try {
-    const result = await User.updateOne(
+    const result = await User.findOneAndUpdate(
       { _id: userId },
       { verify, verificationToken }
     );

@@ -26,7 +26,8 @@ class EmailService {
         break;
     }
   }
-  #createTemplate(verificationToken, name = "Guest") {
+
+  #createTemplate(verificationToken) {
     const mailGenerator = new this.#GenerateTemplate({
       theme: "cerberus",
       product: {
@@ -36,7 +37,6 @@ class EmailService {
     });
     const emailTemplate = {
       body: {
-        name,
         intro:
           "Welcome to Phonebook App! We're very excited to have you on board.",
         action: {
@@ -54,8 +54,8 @@ class EmailService {
     return mailGenerator.generate(emailTemplate);
   }
 
-  async sendEmail(verificationToken, email, name) {
-    const emailBody = this.#createTemplate(verificationToken, name);
+  async sendEmail(verificationToken, email) {
+    const emailBody = this.#createTemplate(verificationToken);
     this.#sender.setApiKey(process.env.SENDGRID_API_KEY);
     const msg = {
       to: email,

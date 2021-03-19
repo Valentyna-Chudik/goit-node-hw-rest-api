@@ -4,7 +4,6 @@ const bcrypt = require("bcryptjs");
 const gravatar = require("gravatar");
 
 const { Subscriptions } = require("../../helpers/constants");
-const { boolean } = require("joi");
 
 require("dotenv").config();
 const saltWorkFactor = Number(process.env.SALT_WORK_FACTOR);

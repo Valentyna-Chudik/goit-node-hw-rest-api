@@ -18,7 +18,7 @@ const registerLimit = rateLimit({
 
 const reguestLimit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 100,
+  max: 200,
   handler: (_req, res, _next) => {
     return res.status(HttpCode.BAD_REQUEST).json({
       status: "Error",
