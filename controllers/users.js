@@ -4,10 +4,12 @@ const path = require("path");
 const Jimp = require("jimp");
 const { promisify } = require("util");
 const cloudinary = require("cloudinary").v2;
+const { nanoid } = require("nanoid");
 require("dotenv").config();
 
 const Users = require("../model/users");
 const { Subscriptions, HttpCode } = require("../helpers/constants");
+const EmailService = require("../services/email");
 const createFolderIsExist = require("../helpers/create-dir");
 
 const SECRET_KEY = process.env.JWT_SECRET;
@@ -21,7 +23,7 @@ const uploadCloud = promisify(cloudinary.uploader.upload);
 
 const register = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
     const user = await Users.findUserByEmail(email);
 
     if (user) {
@@ -33,7 +35,15 @@ const register = async (req, res, next) => {
       });
     }
 
-    const newUser = await Users.createUser({ email, password });
+    const verificationToken = nanoid();
+    const emailService = new EmailService(process.env.NODE_ENV);
+    await emailService.sendEmail(verificationToken, email, name);
+
+    const newUser = await Users.createUser({
+      ...req.body,
+      verify: false,
+      verificationToken,
+    });
     return res.status(HttpCode.CREATED).json({
       status: "Success",
       code: HttpCode.CREATED,
@@ -57,7 +67,7 @@ const login = async (req, res, next) => {
     const user = await Users.findUserByEmail(email);
     const isPasswordValid = await user?.validPassword(password);
 
-    if (!user || !isPasswordValid) {
+    if (!user || !isPasswordValid || !user.verify) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "Error",
         code: HttpCode.UNAUTHORIZED,

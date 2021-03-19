@@ -18,9 +18,27 @@ const findUserById = async (userId) => {
   }
 };
 
-const createUser = async ({ email, password }) => {
+const findUserByToken = async (token) => {
   try {
-    const newUser = new User({ email, password });
+    const result = await User.findOne({ token });
+    return result;
+  } catch (err) {
+    return console.error(err.message);
+  }
+};
+
+const findByVerificationToken = async (verificationToken) => {
+  try {
+    const result = await User.findOne({ verificationToken });
+    return result;
+  } catch (err) {
+    return console.error(err.message);
+  }
+};
+
+const createUser = async ({ email, password, verify, verificationToken }) => {
+  try {
+    const newUser = new User({ email, password, verify, verificationToken });
     return await newUser.save();
   } catch (err) {
     return console.error(err.message);
@@ -36,9 +54,24 @@ const updateUserToken = async (userId, token) => {
   }
 };
 
-const findUserByToken = async (token) => {
+const updateVerificationToken = async (userId, verify, verificationToken) => {
   try {
-    const result = await User.findOne({ token });
+    const result = await User.updateOne(
+      { _id: userId },
+      { verify, verificationToken }
+    );
+    return result;
+  } catch (err) {
+    return console.error(err.message);
+  }
+};
+
+const updateUserAvatar = async (userId, avatar, imgIdCloud) => {
+  try {
+    const result = await User.updateOne(
+      { _id: userId },
+      { avatarURL: avatar, imgIdCloud }
+    );
     return result;
   } catch (err) {
     return console.error(err.message);
@@ -53,24 +86,15 @@ const findUserByToken = async (token) => {
 //     console.error(err.message);
 //   }
 // };
-const updateUserAvatar = async (userId, avatar, imgIdCloud) => {
-  try {
-    const result = await User.updateOne(
-      { _id: userId },
-      { avatarURL: avatar, imgIdCloud }
-    );
-    return result;
-  } catch (err) {
-    return console.error(err.message);
-  }
-};
 
 module.exports = {
   findUserByEmail,
   findUserById,
+  findUserByToken,
+  findByVerificationToken,
   createUser,
   updateUserToken,
-  findUserByToken,
-  // findUserAndUpdate,
+  updateVerificationToken,
   updateUserAvatar,
+  // findUserAndUpdate,
 };
