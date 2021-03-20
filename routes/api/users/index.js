@@ -15,7 +15,6 @@ router.post(
 router.post("/auth/login", userController.login);
 router.post("/auth/logout", guard, userController.logout);
 router.get("/current", guard, userController.getCurrentUser);
-// router.patch("/", guard, userController.updateUserSub);
 router.patch(
   "/avatars",
   guard,

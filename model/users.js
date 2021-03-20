@@ -1,5 +1,14 @@
 const User = require("./schemas/user");
 
+const createUser = async ({ email, password, verificationToken }) => {
+  try {
+    const newUser = new User({ email, password, verificationToken });
+    return await newUser.save();
+  } catch (err) {
+    return console.error(err.message);
+  }
+};
+
 const findUserByEmail = async (email) => {
   try {
     const result = await User.findOne({ email });
@@ -36,15 +45,6 @@ const findByVerificationToken = async (verificationToken) => {
   }
 };
 
-const createUser = async ({ email, password, verify, verificationToken }) => {
-  try {
-    const newUser = new User({ email, password, verify, verificationToken });
-    return await newUser.save();
-  } catch (err) {
-    return console.error(err.message);
-  }
-};
-
 const updateUserToken = async (userId, token) => {
   try {
     const result = await User.updateOne({ _id: userId }, { token });
@@ -54,11 +54,11 @@ const updateUserToken = async (userId, token) => {
   }
 };
 
-const updateVerificationToken = async (userId, verify, verificationToken) => {
+const updateVerificationToken = async (userId, verificationToken) => {
   try {
     const result = await User.findOneAndUpdate(
       { _id: userId },
-      { verify, verificationToken }
+      { verificationToken }
     );
     return result;
   } catch (err) {
@@ -78,23 +78,13 @@ const updateUserAvatar = async (userId, avatar, imgIdCloud) => {
   }
 };
 
-// const findUserAndUpdate = async (userId, subscription) => {
-//   try {
-//     const result = await User.updateOne({ _id: userId }, { subscription });
-//     return result;
-//   } catch (err) {
-//     console.error(err.message);
-//   }
-// };
-
 module.exports = {
+  createUser,
   findUserByEmail,
   findUserById,
   findUserByToken,
   findByVerificationToken,
-  createUser,
   updateUserToken,
   updateVerificationToken,
   updateUserAvatar,
-  // findUserAndUpdate,
 };

@@ -43,10 +43,6 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
-    verify: {
-      type: Boolean,
-      default: false,
-    },
     verificationToken: {
       type: String,
       required: [true, "Verification token is required"],
@@ -64,11 +60,6 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt, null);
   next();
 });
-
-// userSchema.path("email").validate(function (value) {
-//   const re = /\S+@\S+\.\S+/;
-//   return re.test(String(value).toLocaleLowerCase());
-// });
 
 userSchema.methods.validPassword = async function (password) {
   return await bcrypt.compare(password, this.password);

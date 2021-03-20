@@ -8,7 +8,7 @@ const { nanoid } = require("nanoid");
 require("dotenv").config();
 
 const Users = require("../model/users");
-const { Subscriptions, HttpCode } = require("../helpers/constants");
+const { HttpCode } = require("../helpers/constants");
 const EmailService = require("../services/email");
 const createFolderIsExist = require("../helpers/create-dir");
 
@@ -23,7 +23,7 @@ const uploadCloud = promisify(cloudinary.uploader.upload);
 
 const register = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email } = req.body;
     const user = await Users.findUserByEmail(email);
 
     if (user) {
@@ -41,7 +41,6 @@ const register = async (req, res, next) => {
 
     const newUser = await Users.createUser({
       ...req.body,
-      verify: false,
       verificationToken,
     });
     return res.status(HttpCode.CREATED).json({
@@ -51,7 +50,7 @@ const register = async (req, res, next) => {
         user: {
           // id: newUser.id,
           email: newUser.email,
-          subscription: Subscriptions.FREE,
+          subscription: newUser.subscriptions,
           avatarURL: newUser.avatarURL,
         },
       },
@@ -67,7 +66,7 @@ const login = async (req, res, next) => {
     const user = await Users.findUserByEmail(email);
     const isPasswordValid = await user?.validPassword(password);
 
-    if (!user || !isPasswordValid || !user.verify) {
+    if (!user || !isPasswordValid || user.verificationToken) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "Error",
         code: HttpCode.UNAUTHORIZED,
@@ -87,7 +86,7 @@ const login = async (req, res, next) => {
         token,
         user: {
           email,
-          subscription: Subscriptions.FREE,
+          subscription: user.subscription,
         },
       },
     });
@@ -204,9 +203,11 @@ const saveAvatarToCloud = async (req) => {
 
 const verify = async (req, res, next) => {
   try {
-    const user = await Users.findByVerificationToken(req.params.token);
+    const user = await Users.findByVerificationToken(
+      req.params.verificationToken
+    );
     if (user) {
-      await Users.updateVerificationToken(user.id, true, null);
+      await Users.updateVerificationToken(user.id, null);
       return res.status(HttpCode.OK).json({
         status: "Success",
         code: HttpCode.OK,
@@ -230,7 +231,6 @@ module.exports = {
   login,
   logout,
   getCurrentUser,
-  // updateUserSub,
   avatars,
   verify,
 };
