@@ -15,7 +15,6 @@ router.post(
 router.post("/auth/login", userController.login);
 router.post("/auth/logout", guard, userController.logout);
 router.get("/current", guard, userController.getCurrentUser);
-// router.patch("/", guard, userController.updateUserSub);
 router.patch(
   "/avatars",
   guard,
@@ -23,5 +22,6 @@ router.patch(
   validate.validateUploadAvatar,
   userController.avatars
 );
+router.get("/auth/verify/:verificationToken", userController.verify);
 
 module.exports = router;

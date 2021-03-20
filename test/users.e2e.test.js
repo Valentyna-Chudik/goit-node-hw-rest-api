@@ -17,84 +17,76 @@ jest.mock("cloudinary");
 
 describe("Testing the api/users route", () => {
   describe("Should handle post request", () => {
-    it("Should return 201 status for registration", async (done) => {
+    it("Should return 201 status for registration", async () => {
       const res = await request(app)
         .post("/api/users/auth/register")
         .send(newUser)
         .set("Accept", "application/json");
       expect(res.status).toEqual(201);
       expect(res.body).toBeDefined();
-      done();
     });
 
-    it("Should return 409 status for registration: email is already used", async (done) => {
+    it("Should return 409 status for registration: email is already used", async () => {
       const res = await request(app)
         .post("/api/users/auth/register")
         .send(newUser)
         .set("Accept", "application/json");
       expect(res.status).toEqual(409);
       expect(res.body).toBeDefined();
-      done();
     });
 
-    it("Should return 200 status for login", async (done) => {
+    it("Should return 200 status for login", async () => {
       const res = await request(app)
         .post("/api/users/auth/login")
         .send(newUser)
         .set("Accept", "application/json");
       expect(res.status).toEqual(200);
       expect(res.body).toBeDefined();
-      done();
     });
 
-    it("Should return 401 status for unauthorized user", async (done) => {
+    it("Should return 401 status for unauthorized user", async () => {
       const res = await request(app)
         .post("/api/users/auth/login")
         .send({ email: "fake@test.com", password: "123456" })
         .set("Accept", "application/json");
       expect(res.status).toEqual(401);
       expect(res.body).toBeDefined();
-      done();
     });
 
-    it("Should return 204 status for logout", async (done) => {
+    it("Should return 204 status for logout", async () => {
       const res = await request(app)
         .post("/api/users/auth/logout")
         .set("Authorization", `Bearer ${token}`);
       expect(res.status).toEqual(204);
-      done();
     });
 
-    it("Should return  401 status for logout by unauthorized user", async (done) => {
+    it("Should return  401 status for logout by unauthorized user", async () => {
       const res = await request(app)
         .post("/api/users/auth/logout")
         .send({ email: "fake@test.com", password: "123456" });
       expect(res.status).toEqual(401);
-      done();
     });
   });
 
   describe("Should handle get request", () => {
-    it("Should return 200 status for get current user ", async (done) => {
+    it("Should return 200 status for get current user", async () => {
       const res = await request(app)
         .get("/api/users/current")
         .set("Authorization", `Bearer ${token}`);
       // console.log(res.body);
       expect(res.status).toEqual(200);
-      done();
     });
 
-    it("Should return 401 status for try to get current user by unauthorized user", async (done) => {
+    it("Should return 401 status for try to get current user by unauthorized user", async () => {
       const res = await request(app)
         .get("/api/users/current")
         .send({ email: "fake@test.com", password: "123456" });
       expect(res.status).toEqual(401);
-      done();
     });
   });
 
   describe("Should handle patch request", () => {
-    it("Should return 200 status for upload avatar", async (done) => {
+    it("Should return 200 status for upload avatar", async () => {
       const buffer = await fs.readFile("./test/default-av.jpg");
       const res = await request(app)
         .patch("/api/users/avatars")
@@ -102,16 +94,14 @@ describe("Testing the api/users route", () => {
         .attach("avatar", buffer, "default-av.jpg");
       expect(res.status).toEqual(200);
       expect(res.body).toBeDefined();
-      done();
     });
 
-    it("Should return 401 status for upload avatar by unauthorized user", async (done) => {
+    it("Should return 401 status for upload avatar by unauthorized user", async () => {
       const res = await request(app)
         .patch("/api/users/avatars")
         .send({ email: "fake@test.com", password: "123456" });
       expect(res.status).toEqual(401);
       expect(res.body).toBeDefined();
-      done();
     });
   });
 });

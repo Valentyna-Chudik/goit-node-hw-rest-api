@@ -1,5 +1,14 @@
 const User = require("./schemas/user");
 
+const createUser = async ({ email, password, verificationToken }) => {
+  try {
+    const newUser = new User({ email, password, verificationToken });
+    return await newUser.save();
+  } catch (err) {
+    return console.error(err.message);
+  }
+};
+
 const findUserByEmail = async (email) => {
   try {
     const result = await User.findOne({ email });
@@ -18,10 +27,19 @@ const findUserById = async (userId) => {
   }
 };
 
-const createUser = async ({ email, password }) => {
+const findUserByToken = async (token) => {
   try {
-    const newUser = new User({ email, password });
-    return await newUser.save();
+    const result = await User.findOne({ token });
+    return result;
+  } catch (err) {
+    return console.error(err.message);
+  }
+};
+
+const findByVerificationToken = async (verificationToken) => {
+  try {
+    const result = await User.findOne({ verificationToken });
+    return result;
   } catch (err) {
     return console.error(err.message);
   }
@@ -36,23 +54,18 @@ const updateUserToken = async (userId, token) => {
   }
 };
 
-const findUserByToken = async (token) => {
+const updateVerificationToken = async (userId, verificationToken) => {
   try {
-    const result = await User.findOne({ token });
+    const result = await User.findOneAndUpdate(
+      { _id: userId },
+      { verificationToken }
+    );
     return result;
   } catch (err) {
     return console.error(err.message);
   }
 };
 
-// const findUserAndUpdate = async (userId, subscription) => {
-//   try {
-//     const result = await User.updateOne({ _id: userId }, { subscription });
-//     return result;
-//   } catch (err) {
-//     console.error(err.message);
-//   }
-// };
 const updateUserAvatar = async (userId, avatar, imgIdCloud) => {
   try {
     const result = await User.updateOne(
@@ -66,11 +79,12 @@ const updateUserAvatar = async (userId, avatar, imgIdCloud) => {
 };
 
 module.exports = {
+  createUser,
   findUserByEmail,
   findUserById,
-  createUser,
-  updateUserToken,
   findUserByToken,
-  // findUserAndUpdate,
+  findByVerificationToken,
+  updateUserToken,
+  updateVerificationToken,
   updateUserAvatar,
 };

@@ -4,10 +4,12 @@ const path = require("path");
 const Jimp = require("jimp");
 const { promisify } = require("util");
 const cloudinary = require("cloudinary").v2;
+const { nanoid } = require("nanoid");
 require("dotenv").config();
 
 const Users = require("../model/users");
-const { Subscriptions, HttpCode } = require("../helpers/constants");
+const { HttpCode } = require("../helpers/constants");
+const EmailService = require("../services/email");
 const createFolderIsExist = require("../helpers/create-dir");
 
 const SECRET_KEY = process.env.JWT_SECRET;
@@ -21,7 +23,7 @@ const uploadCloud = promisify(cloudinary.uploader.upload);
 
 const register = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email } = req.body;
     const user = await Users.findUserByEmail(email);
 
     if (user) {
@@ -33,15 +35,22 @@ const register = async (req, res, next) => {
       });
     }
 
-    const newUser = await Users.createUser({ email, password });
+    const verificationToken = nanoid();
+    const emailService = new EmailService(process.env.NODE_ENV);
+    await emailService.sendEmail(verificationToken, email);
+
+    const newUser = await Users.createUser({
+      ...req.body,
+      verificationToken,
+    });
     return res.status(HttpCode.CREATED).json({
       status: "Success",
       code: HttpCode.CREATED,
       data: {
         user: {
-          id: newUser.id,
+          // id: newUser.id,
           email: newUser.email,
-          subscription: Subscriptions.FREE,
+          subscription: newUser.subscriptions,
           avatarURL: newUser.avatarURL,
         },
       },
@@ -57,7 +66,7 @@ const login = async (req, res, next) => {
     const user = await Users.findUserByEmail(email);
     const isPasswordValid = await user?.validPassword(password);
 
-    if (!user || !isPasswordValid) {
+    if (!user || !isPasswordValid || user.verificationToken) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "Error",
         code: HttpCode.UNAUTHORIZED,
@@ -77,7 +86,7 @@ const login = async (req, res, next) => {
         token,
         user: {
           email,
-          subscription: Subscriptions.FREE,
+          subscription: user.subscription,
         },
       },
     });
@@ -192,11 +201,36 @@ const saveAvatarToCloud = async (req) => {
   return result;
 };
 
+const verify = async (req, res, next) => {
+  try {
+    const user = await Users.findByVerificationToken(
+      req.params.verificationToken
+    );
+    if (user) {
+      await Users.updateVerificationToken(user.id, null);
+      return res.status(HttpCode.OK).json({
+        status: "Success",
+        code: HttpCode.OK,
+        message: "Verification successful!",
+      });
+    }
+
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: "Error",
+      code: HttpCode.BAD_REQUEST,
+      data: "Bad request",
+      message: "Link is not valid",
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
 module.exports = {
   register,
   login,
   logout,
   getCurrentUser,
-  // updateUserSub,
   avatars,
+  verify,
 };
